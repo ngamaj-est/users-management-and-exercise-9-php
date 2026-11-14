@@ -156,4 +156,97 @@ final class DependencyInjection
             self::getUserRepository()
         );
     }
+
+    // -------------------------------------------------------------------------
+    // Enfermedad
+    // -------------------------------------------------------------------------
+
+    public static function getEnfermedadPersistenceMapper(): EnfermedadPersistenceMapper
+    {
+        ClassLoader::loadClass('EnfermedadPersistenceMapper');
+
+        return new EnfermedadPersistenceMapper();
+    }
+
+    public static function getEnfermedadRepository(): EnfermedadRepositoryMySQL
+    {
+        ClassLoader::loadClass('EnfermedadRepositoryMySQL');
+
+        return new EnfermedadRepositoryMySQL(
+            self::getPdo(),
+            self::getEnfermedadPersistenceMapper()
+        );
+    }
+
+    public static function getCreateEnfermedadUseCase(): CreateEnfermedadUseCase
+    {
+        ClassLoader::loadClass('CreateEnfermedadService');
+        $repository = self::getEnfermedadRepository();
+
+        return new CreateEnfermedadService(
+            $repository,
+            $repository
+        );
+    }
+
+    public static function getUpdateEnfermedadUseCase(): UpdateEnfermedadUseCase
+    {
+        ClassLoader::loadClass('UpdateEnfermedadService');
+        $repository = self::getEnfermedadRepository();
+
+        return new UpdateEnfermedadService(
+            $repository,
+            $repository
+        );
+    }
+
+    public static function getGetEnfermedadByIdUseCase(): GetEnfermedadByIdUseCase
+    {
+        ClassLoader::loadClass('GetEnfermedadByIdService');
+
+        return new GetEnfermedadByIdService(
+            self::getEnfermedadRepository()
+        );
+    }
+
+    public static function getGetAllEnfermedadesUseCase(): GetAllEnfermedadesUseCase
+    {
+        ClassLoader::loadClass('GetAllEnfermedadesService');
+
+        return new GetAllEnfermedadesService(
+            self::getEnfermedadRepository()
+        );
+    }
+
+    public static function getDeleteEnfermedadUseCase(): DeleteEnfermedadUseCase
+    {
+        ClassLoader::loadClass('DeleteEnfermedadService');
+        $repository = self::getEnfermedadRepository();
+
+        return new DeleteEnfermedadService(
+            $repository,
+            $repository
+        );
+    }
+
+    public static function getEnfermedadWebMapper(): EnfermedadWebMapper
+    {
+        ClassLoader::loadClass('EnfermedadWebMapper');
+
+        return new EnfermedadWebMapper();
+    }
+
+    public static function getEnfermedadController(): EnfermedadController
+    {
+        ClassLoader::loadClass('EnfermedadController');
+
+        return new EnfermedadController(
+            self::getCreateEnfermedadUseCase(),
+            self::getUpdateEnfermedadUseCase(),
+            self::getGetEnfermedadByIdUseCase(),
+            self::getGetAllEnfermedadesUseCase(),
+            self::getDeleteEnfermedadUseCase(),
+            self::getEnfermedadWebMapper()
+        );
+    }
 }
