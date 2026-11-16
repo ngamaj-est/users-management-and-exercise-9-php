@@ -37,17 +37,16 @@ final class Connection
             $this->charset
         );
 
-        $pdo = new PDO(
-            $dsn,
-            $this->username,
-            $this->password,
-            array(
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                PDO::ATTR_EMULATE_PREPARES => false,
-            )
+        $options = array(
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
         );
 
-        return $pdo;
+        if (getenv('DB_SSL') === 'true' || ($_ENV['DB_SSL'] ?? '') === 'true') {
+            $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
+        }
+
+        return new PDO($dsn, $this->username, $this->password, $options);
     }
 }
