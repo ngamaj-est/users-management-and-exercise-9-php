@@ -9,9 +9,9 @@ IDENTIFIED BY 'Developer';
 -- 2. CREAR BASE DE DATOS
 -- ============================================
 
-DROP DATABASE IF EXISTS crud_ejercicio9;
+DROP DATABASE IF EXISTS Enfermedades_db;
 
-CREATE DATABASE crud_ejercicio9;
+CREATE DATABASE Enfermedades_db;
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
 
@@ -29,7 +29,7 @@ FLUSH PRIVILEGES;
 -- 4. USAR BASE DE DATOS
 -- ============================================
 
-USE crud_ejercicio9;
+USE Enfermedades_db;
 
 -- ============================================
 -- 5. TABLA DE ROLES
