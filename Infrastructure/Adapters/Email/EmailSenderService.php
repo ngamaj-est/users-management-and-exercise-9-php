@@ -43,6 +43,11 @@ final class EmailSenderService implements EmailSenderPort
 
     public function send(EmailDestinationModel $destination): void
     {
+        if (empty($this->host) || empty($this->username) || empty($this->password) || empty($this->fromAddress)) {
+            error_log('[EmailSenderService] SMTP no configurado, omitiendo envío de correo a ' . $destination->getDestinationEmail());
+            return;
+        }
+
         try {
             $mailer = new PHPMailer(true);
 
@@ -55,6 +60,8 @@ final class EmailSenderService implements EmailSenderPort
             $mailer->SMTPSecure = $this->encryption;
             $mailer->Port = $this->port;
             $mailer->CharSet = 'UTF-8';
+            $mailer->Timeout = 3;
+            $mailer->Timelimit = 3;
 
             $mailer->setFrom($this->fromAddress, $this->fromName);
             $mailer->addAddress(
@@ -68,7 +75,7 @@ final class EmailSenderService implements EmailSenderPort
 
             $mailer->send();
 
-        } catch (PHPMailerException $e) {
+        } catch (Throwable $e) {
             throw new EmailSenderException(
                 'No se pudo enviar el correo a ' . $destination->getDestinationEmail()
                 . '. Error SMTP: ' . $e->getMessage(),

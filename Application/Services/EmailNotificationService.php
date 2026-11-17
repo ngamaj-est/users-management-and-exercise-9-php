@@ -31,9 +31,8 @@ final class EmailNotificationService
 
             $this->emailSenderPort->send($destination);
 
-        } catch (EmailSenderException $e) {
+        } catch (Throwable $e) {
             error_log('[EmailNotificationService] ' . $e->getMessage());
-            throw $e;
         }
     }
 
@@ -52,9 +51,8 @@ final class EmailNotificationService
 
             $this->emailSenderPort->send($destination);
 
-        } catch (EmailSenderException $e) {
+        } catch (Throwable $e) {
             error_log('[EmailNotificationService] ' . $e->getMessage());
-            throw $e;
         }
     }
 
