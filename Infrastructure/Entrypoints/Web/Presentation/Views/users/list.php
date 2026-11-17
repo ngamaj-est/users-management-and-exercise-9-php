@@ -15,6 +15,10 @@
     </div>
 <?php endif; ?>
 
+<p>
+    <a class="btn btn-primary" href="?route=users.create">+ Registrar usuario</a>
+</p>
+
 <?php if (empty($users)): ?>
     <p>No hay usuarios registrados todavía.</p>
 <?php else: ?>

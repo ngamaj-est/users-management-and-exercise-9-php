@@ -78,7 +78,11 @@ if ($httpMethod !== $definition['method']) {
 }
 
 // Protect all user management routes behind authentication.
-$publicActions = array('home', 'login', 'authenticate', 'logout', 'forgot', 'forgot.send', 'create', 'store');
+$publicActions = array(
+    'home', 'login', 'authenticate', 'logout', 'forgot', 'forgot.send', 'create', 'store',
+    'enfermedades.index', 'enfermedades.create', 'enfermedades.store',
+    'enfermedades.show', 'enfermedades.edit', 'enfermedades.update', 'enfermedades.delete'
+);
 if (!in_array($definition['action'], $publicActions, true) && !isLoggedIn()) {
     Flash::setMessage('Debes iniciar sesión para acceder a esta sección.');
     View::redirect('auth.login');
@@ -282,6 +286,123 @@ try {
             View::redirect('auth.forgot');
             break;
 
+        case 'enfermedades.index':
+            $controller = DependencyInjection::getEnfermedadController();
+            $enfermedades = $controller->index();
+            View::render('enfermedades/list', array(
+                'pageTitle' => 'Lista de enfermedades',
+                'enfermedades' => $enfermedades,
+                'message' => Flash::message(),
+                'success' => Flash::success(),
+            ));
+            break;
+
+        case 'enfermedades.create':
+            ClassLoader::loadClass('EnfermedadNivelGravedadEnum');
+            View::render('enfermedades/create', array(
+                'pageTitle' => 'Registrar enfermedad',
+                'nivelGravedadOptions' => EnfermedadNivelGravedadEnum::values(),
+                'message' => Flash::message(),
+                'success' => Flash::success(),
+                'errors' => Flash::errors(),
+                'old' => Flash::old(),
+            ));
+            break;
+
+        case 'enfermedades.store':
+            $controller = DependencyInjection::getEnfermedadController();
+            $form = getEnfermedadFormData();
+            $form['id'] = generateUuid4();
+            $errors = validateEnfermedadForm($form);
+
+            if (!empty($errors)) {
+                Flash::setOld($form);
+                Flash::setErrors($errors);
+                Flash::setMessage('Corrige los errores del formulario.');
+                View::redirect('enfermedades.create');
+            }
+
+            ClassLoader::loadClass('CreateEnfermedadWebRequest');
+            $controller->store(new CreateEnfermedadWebRequest(
+                $form['id'],
+                $form['nombre'],
+                $form['nombreCientifico'],
+                $form['nivelGravedad'],
+                $form['sintomas'],
+                $form['medicamentos'],
+                $form['esContagiosa'],
+                $form['esCubiertaPorPos'],
+                $form['requiereIncapacidad']
+            ));
+
+            Flash::setSuccess('Enfermedad registrada correctamente.');
+            View::redirect('enfermedades.index');
+            break;
+
+        case 'enfermedades.show':
+            $controller = DependencyInjection::getEnfermedadController();
+            $id = isset($_GET['id']) ? trim((string) $_GET['id']) : '';
+            $enfermedad = $controller->show($id);
+            View::render('enfermedades/show', array(
+                'pageTitle' => 'Detalle de enfermedad',
+                'enfermedad' => $enfermedad,
+                'message' => Flash::message(),
+            ));
+            break;
+
+        case 'enfermedades.edit':
+            $controller = DependencyInjection::getEnfermedadController();
+            $id = isset($_GET['id']) ? trim((string) $_GET['id']) : '';
+            $enfermedad = $controller->show($id);
+            ClassLoader::loadClass('EnfermedadNivelGravedadEnum');
+            View::render('enfermedades/edit', array(
+                'pageTitle' => 'Editar enfermedad',
+                'enfermedad' => $enfermedad,
+                'nivelGravedadOptions' => EnfermedadNivelGravedadEnum::values(),
+                'message' => Flash::message(),
+                'errors' => Flash::errors(),
+                'old' => Flash::old(),
+            ));
+            break;
+
+        case 'enfermedades.update':
+            $controller = DependencyInjection::getEnfermedadController();
+            $form = getEnfermedadFormData();
+            $errors = validateEnfermedadForm($form, true);
+
+            if (!empty($errors)) {
+                Flash::setOld($form);
+                Flash::setErrors($errors);
+                Flash::setMessage('Corrige los errores del formulario.');
+                header('Location: ?route=enfermedades.edit&id=' . urlencode($form['id']));
+                exit;
+            }
+
+            ClassLoader::loadClass('UpdateEnfermedadWebRequest');
+            $controller->update(new UpdateEnfermedadWebRequest(
+                $form['id'],
+                $form['nombre'],
+                $form['nombreCientifico'],
+                $form['nivelGravedad'],
+                $form['sintomas'],
+                $form['medicamentos'],
+                $form['esContagiosa'],
+                $form['esCubiertaPorPos'],
+                $form['requiereIncapacidad']
+            ));
+
+            Flash::setSuccess('Enfermedad actualizada correctamente.');
+            View::redirect('enfermedades.index');
+            break;
+
+        case 'enfermedades.delete':
+            $controller = DependencyInjection::getEnfermedadController();
+            $id = isset($_POST['id']) ? trim((string) $_POST['id']) : '';
+            $controller->delete($id);
+            Flash::setSuccess('Enfermedad eliminada correctamente.');
+            View::redirect('enfermedades.index');
+            break;
+
         default:
             throw new RuntimeException('Acción no soportada.');
     }
@@ -319,6 +440,25 @@ try {
         case 'users.delete':
             Flash::setMessage($msg);
             View::redirect('users.index');
+            break;
+
+        case 'enfermedades.store':
+            Flash::setOld(getEnfermedadFormData());
+            View::redirect('enfermedades.create');
+            break;
+
+        case 'enfermedades.update':
+            $updateId = trim((string) ($_POST['id'] ?? ''));
+            Flash::setOld(getEnfermedadFormData());
+            header('Location: ?route=enfermedades.edit&id=' . urlencode($updateId));
+            exit;
+
+        case 'enfermedades.show':
+        case 'enfermedades.edit':
+        case 'enfermedades.delete':
+        case 'enfermedades.index':
+            Flash::setMessage($msg);
+            View::redirect('enfermedades.index');
             break;
 
         default:
@@ -509,5 +649,49 @@ function validateUpdateUserForm(array $form): array
         $errors['status'] = 'El estado es obligatorio.';
     }
 
+    return $errors;
+}
+
+function getEnfermedadFormData(): array
+{
+    $lines = fn($x) => is_array($x) ? $x : array_values(array_filter(array_map('trim', preg_split('/[\r\n]+/', (string) $x))));
+    return [
+        'id'                  => trim((string) ($_POST['id'] ?? '')),
+        'nombre'              => trim((string) ($_POST['nombre'] ?? '')),
+        'nombreCientifico'    => trim((string) ($_POST['nombreCientifico'] ?? '')),
+        'nivelGravedad'       => trim((string) ($_POST['nivelGravedad'] ?? '')),
+        'sintomas'            => $lines($_POST['sintomas'] ?? ''),
+        'medicamentos'        => $lines($_POST['medicamentos'] ?? ''),
+        'esContagiosa'        => !empty($_POST['esContagiosa']),
+        'esCubiertaPorPos'    => !empty($_POST['esCubiertaPorPos']),
+        'requiereIncapacidad' => !empty($_POST['requiereIncapacidad']),
+    ];
+}
+
+function validateEnfermedadForm(array $form, bool $isUpdate = false): array
+{
+    $errors = [];
+    if ($isUpdate && empty($form['id'])) {
+        $errors['id'] = 'El ID de la enfermedad es obligatorio.';
+    }
+    if ($form['nombre'] === '') {
+        $errors['nombre'] = 'El nombre es obligatorio.';
+    } elseif (mb_strlen($form['nombre']) < 3) {
+        $errors['nombre'] = 'El nombre debe contener al menos 3 caracteres.';
+    }
+    if ($form['nombreCientifico'] === '') {
+        $errors['nombreCientifico'] = 'El nombre científico es obligatorio.';
+    } elseif (mb_strlen($form['nombreCientifico']) < 2) {
+        $errors['nombreCientifico'] = 'El nombre científico debe contener al menos 2 caracteres.';
+    }
+    if ($form['nivelGravedad'] === '') {
+        $errors['nivelGravedad'] = 'El nivel de gravedad es obligatorio.';
+    }
+    if (empty($form['sintomas'])) {
+        $errors['sintomas'] = 'Debes ingresar al menos un síntoma.';
+    }
+    if (empty($form['medicamentos'])) {
+        $errors['medicamentos'] = 'Debes ingresar al menos un medicamento.';
+    }
     return $errors;
 }

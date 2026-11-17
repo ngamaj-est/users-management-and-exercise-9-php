@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../Dto/EnfermedadPersistenceDto.php';
 require_once __DIR__ . '/../Entity/EnfermedadEntity.php';
-
 require_once __DIR__ . '/../../../../../Domain/Models/EnfermedadModel.php';
 require_once __DIR__ . '/../../../../../Domain/ValueObjects/EnfermedadNombre.php';
 require_once __DIR__ . '/../../../../../Domain/ValueObjects/EnfermedadNombreCientifico.php';
@@ -50,15 +49,15 @@ final class EnfermedadPersistenceMapper
     public function fromRowToEntity(array $row): EnfermedadEntity
     {
         return new EnfermedadEntity(
-            (string) $row['id'],
-            (string) $row['nombre'],
-            (string) $row['nombre_cientifico'],
-            (string) $row['nivel_gravedad'],
-            (string) $row['sintomas'],
-            (string) $row['medicamentos'],
-            (bool)   $row['es_contagiosa'],
-            (bool)   $row['es_cubierta_por_pos'],
-            (bool)   $row['requiere_incapacidad'],
+            (string) ($row['id'] ?? ''),
+            (string) ($row['nombre'] ?? ''),
+            (string) ($row['nombreCientifico'] ?? $row['nombre_cientifico'] ?? ''),
+            (string) ($row['nivelGravedad'] ?? $row['nivel_gravedad'] ?? ''),
+            (string) ($row['sintomas'] ?? ''),
+            (string) ($row['medicamentos'] ?? ''),
+            (bool)   ($row['esContagiosa'] ?? $row['es_contagiosa'] ?? false),
+            (bool)   ($row['esCubiertaPorPos'] ?? $row['es_cubierta_por_pos'] ?? false),
+            (bool)   ($row['requiereIncapacidad'] ?? $row['requiere_incapacidad'] ?? false),
             isset($row['created_at']) ? (string) $row['created_at'] : null,
             isset($row['updated_at']) ? (string) $row['updated_at'] : null
         );
@@ -66,13 +65,31 @@ final class EnfermedadPersistenceMapper
 
     public function fromEntityToModel(EnfermedadEntity $entity): EnfermedadModel
     {
+        $parseList = function (string $raw): array {
+            $decoded = json_decode($raw, true);
+            $items = is_array($decoded) ? $decoded : preg_split('/[\r\n,]+/', $raw);
+            $clean = array_values(array_filter(array_map('trim', (array) $items), fn($x) => mb_strlen($x) >= 3));
+            return !empty($clean) ? $clean : ['No especificado'];
+        };
+
+        $mapNivel = ['LEVE' => 'LEVE', 'MODERADA' => 'MODERADA', 'GRAVE' => 'GRAVE', 'CRITICA' => 'CRITICA', 'CRÍTICA' => 'CRITICA'];
+        $nivelGravedad = $mapNivel[strtoupper(trim($entity->nivelGravedad()))] ?? 'LEVE';
+
+        $cientifico = trim($entity->nombreCientifico());
+        if (!preg_match('/^[A-ZÁÉÍÓÚÑÜ][a-záéíóúñü]+(\s[a-záéíóúñü]+)+$/', $cientifico)) {
+            $words = preg_split('/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ]+/', $cientifico, -1, PREG_SPLIT_NO_EMPTY);
+            $cientifico = count($words) >= 2
+                ? ucfirst(mb_strtolower($words[0])) . ' ' . mb_strtolower($words[1])
+                : (count($words) === 1 ? ucfirst(mb_strtolower($words[0])) . ' sp' : 'Incertae sedis');
+        }
+
         return EnfermedadModel::create(
             $entity->id(),
             new EnfermedadNombre($entity->nombre()),
-            new EnfermedadNombreCientifico($entity->nombreCientifico()),
-            new EnfermedadNivelGravedad($entity->nivelGravedad()),
-            new EnfermedadSintomas(json_decode($entity->sintomas(), true)),
-            new EnfermedadMedicamentos(json_decode($entity->medicamentos(), true)),
+            new EnfermedadNombreCientifico($cientifico),
+            new EnfermedadNivelGravedad($nivelGravedad),
+            new EnfermedadSintomas($parseList($entity->sintomas())),
+            new EnfermedadMedicamentos($parseList($entity->medicamentos())),
             new EnfermedadEsContagiosa($entity->esContagiosa()),
             new EnfermedadEsCubiertaPorPos($entity->esCubiertaPorPos()),
             new EnfermedadRequiereIncapacidad($entity->requiereIncapacidad())
@@ -90,10 +107,6 @@ final class EnfermedadPersistenceMapper
      */
     public function fromRowsToModels(array $rows): array
     {
-        $models = array();
-        foreach ($rows as $row) {
-            $models[] = $this->fromRowToModel($row);
-        }
-        return $models;
+        return array_map(fn($r) => $this->fromRowToModel($r), $rows);
     }
 }
