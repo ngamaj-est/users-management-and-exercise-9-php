@@ -21,7 +21,7 @@
     <div class="form-group">
         <label for="name">Nombre</label><br>
         <input type="text" id="name" name="name"
-            value="<?= htmlspecialchars($old['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            value="<?= htmlspecialchars($old['name'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required autofocus>
         <?php if (!empty($errors['name'])): ?>
             <div class="field-error">
                 <?= htmlspecialchars($errors['name'], ENT_QUOTES, 'UTF-8') ?>
@@ -32,7 +32,7 @@
     <div class="form-group">
         <label for="email">Correo</label><br>
         <input type="email" id="email" name="email"
-            value="<?= htmlspecialchars($old['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            value="<?= htmlspecialchars($old['email'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
         <?php if (!empty($errors['email'])): ?>
             <div class="field-error">
                 <?= htmlspecialchars($errors['email'], ENT_QUOTES, 'UTF-8') ?>
@@ -43,7 +43,7 @@
     <div class="form-group">
         <label for="password">Contraseña</label><br>
         <input type="password" id="password" name="password"
-            value="<?= htmlspecialchars($old['password'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+            value="<?= htmlspecialchars($old['password'] ?? '', ENT_QUOTES, 'UTF-8') ?>" required>
         <?php if (!empty($errors['password'])): ?>
             <div class="field-error">
                 <?= htmlspecialchars($errors['password'], ENT_QUOTES, 'UTF-8') ?>
@@ -55,7 +55,7 @@
         <label for="role">Rol</label><br>
         <select id="role" name="role">
             <?php foreach ($roleOptions as $opt): ?>
-                <option value="<?= htmlspecialchars($opt, ENT_QUOTES, 'UTF-8') ?>" <?= (($old['role'] ?? '') === $opt) ? 'selected' : '' ?>>
+                <option value="<?= htmlspecialchars($opt, ENT_QUOTES, 'UTF-8') ?>" <?= (($old['role'] ?? UserRoleEnum::MEMBER) === $opt) ? 'selected' : '' ?>>
                     <?= htmlspecialchars($opt, ENT_QUOTES, 'UTF-8') ?>
                 </option>
             <?php endforeach; ?>
@@ -68,6 +68,8 @@
     </div>
 
     <button type="submit" class="btn btn-primary">Registrar usuario</button>
+    &nbsp;
+    <a class="btn" href="<?= isLoggedIn() ? '?route=users.index' : '?route=auth.login' ?>">Cancelar</a>
 </form>
 
 <?php require __DIR__ . '/../layouts/footer.php'; ?>

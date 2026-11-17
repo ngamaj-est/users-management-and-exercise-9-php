@@ -119,7 +119,11 @@ try {
             $controller->store($request);
 
             Flash::setSuccess('Usuario registrado correctamente.');
-            View::redirect('users.index');
+            if (isLoggedIn()) {
+                View::redirect('users.index');
+            } else {
+                View::redirect('auth.login');
+            }
             break;
 
         case 'index':
@@ -189,6 +193,7 @@ try {
             View::render('auth/login', array(
                 'pageTitle' => 'Iniciar sesión',
                 'message' => Flash::message(),
+                'success' => Flash::success(),
                 'errors' => Flash::errors(),
                 'old' => Flash::old(),
             ));

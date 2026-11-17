@@ -9,6 +9,12 @@
         </div>
     <?php endif; ?>
 
+    <?php if (!empty($success)): ?>
+        <div class="alert-success">
+            <?= htmlspecialchars($success, ENT_QUOTES, 'UTF-8') ?>
+        </div>
+    <?php endif; ?>
+
     <form method="POST" action="?route=auth.authenticate">
         <div class="form-group">
             <label for="email">Correo electrónico</label><br>
@@ -31,6 +37,10 @@
     </form>
 
     <p style="margin-top: 16px;">
+        <a href="?route=users.create">Crear usuario</a>
+    </p>
+
+    <p style="margin-top: 8px;">
         <a href="?route=auth.forgot">¿Olvidaste tu contraseña?</a>
     </p>
 </div>
