@@ -62,6 +62,34 @@ final class WebRoutes
                 'method' => 'POST',
                 'action' => 'forgot.send',
             ),
+            'enfermedades.index' => array(
+                'method' => 'GET',
+                'action' => 'enfermedades.index',
+            ),
+            'enfermedades.create' => array(
+                'method' => 'GET',
+                'action' => 'enfermedades.create',
+            ),
+            'enfermedades.store' => array(
+                'method' => 'POST',
+                'action' => 'enfermedades.store',
+            ),
+            'enfermedades.show' => array(
+                'method' => 'GET',
+                'action' => 'enfermedades.show',
+            ),
+            'enfermedades.edit' => array(
+                'method' => 'GET',
+                'action' => 'enfermedades.edit',
+            ),
+            'enfermedades.update' => array(
+                'method' => 'POST',
+                'action' => 'enfermedades.update',
+            ),
+            'enfermedades.delete' => array(
+                'method' => 'POST',
+                'action' => 'enfermedades.delete',
+            ),
         );
     }
 }
