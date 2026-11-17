@@ -37,10 +37,6 @@
     </form>
 
     <p style="margin-top: 16px;">
-        <a href="?route=users.create">Crear usuario</a>
-    </p>
-
-    <p style="margin-top: 8px;">
         <a href="?route=auth.forgot">¿Olvidaste tu contraseña?</a>
     </p>
 </div>
