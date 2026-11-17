@@ -24,7 +24,7 @@ final class UserApplicationMapper
             new UserEmail($command->getEmail()),
             UserPassword::fromPlainText($command->getPassword()),
             $command->getRole(),
-            UserStatusEnum::PENDING
+            UserStatusEnum::ACTIVE
         );
     }
 

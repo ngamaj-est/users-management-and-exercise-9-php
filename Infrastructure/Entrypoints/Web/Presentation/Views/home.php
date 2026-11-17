@@ -18,11 +18,11 @@
 <?php endif; ?>
 
 <ul>
-    <li><strong>C:</strong> Registrar usuario</li>
-    <li><strong>R:</strong> Consultar usuario</li>
-    <li><strong>U:</strong> Actualizar usuario</li>
-    <li><strong>D:</strong> Eliminar usuario</li>
-    <li><strong>L:</strong> Listar usuarios</li>
+    <li><strong>C:</strong> <a href="?route=users.create">Registrar usuario</a></li>
+    <li><strong>R:</strong> <a href="?route=users.index">Consultar usuario</a></li>
+    <li><strong>U:</strong> <a href="?route=users.index">Actualizar usuario</a></li>
+    <li><strong>D:</strong> <a href="?route=users.index">Eliminar usuario</a></li>
+    <li><strong>L:</strong> <a href="?route=users.index">Listar usuarios</a></li>
 </ul>
 
 <?php require __DIR__ . '/layouts/footer.php'; ?>

@@ -15,6 +15,7 @@
         <a href="?route=auth.logout">Cerrar sesión</a>
     <?php else: ?>
         <a href="?route=auth.login">Iniciar sesión</a>
+        <a href="?route=users.create">Crear usuario</a>
         <a href="?route=auth.forgot">Recuperar contraseña</a>
     <?php endif; ?>
 </nav>
